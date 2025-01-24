@@ -29,7 +29,7 @@
 <script lang="ts" setup>
 import { userLoginUsingPost } from '@/api/userController.ts'
 import { message } from 'ant-design-vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { reactive } from 'vue'
 
@@ -40,6 +40,7 @@ const formState = reactive<API.UserLoginRequest>({
 
 
 const router = useRouter()
+const route = useRoute()
 const loginUserStore = useLoginUserStore()
 
 /**
@@ -52,13 +53,26 @@ const handleSubmit = async (values: any) => {
   if (res.data.code === 0 && res.data.data) {
     await loginUserStore.fetchLoginUser()
     message.success('登录成功')
-    router.push({
-      path: '/',
-      replace: true,
-    })
+    // 获取重定向参数
+    const redirect = route.query.redirect as string | undefined
+
+    if (redirect) {
+      // 如果存在重定向参数，跳转到指定路径
+      router.push({
+        path: redirect,
+        replace: true,
+      })
+    } else {
+      // 否则跳转到首页
+      router.push({
+        path: '/',
+        replace: true,
+      })
+    }
   } else {
     message.error('登录失败，' + res.data.message)
   }
+
 }
 
 </script>
