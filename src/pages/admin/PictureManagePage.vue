@@ -1,17 +1,31 @@
 <template>
-  <div id="userManagePage">
+  <div id="PictureManagePage">
     <!--搜索表单-->
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
-      <a-form-item label="账号">
-        <a-input v-model:value="searchParams.userAccount" placeholder="输入账号" allow-clear />
+      <a-form-item label="关键词" name="searchText">
+        <a-input
+          v-model:value="searchParams.searchText"
+          placeholder="从名称和简介搜索"
+          allow-clear
+        />
       </a-form-item>
-      <a-form-item label="用户名">
-        <a-input v-model:value="searchParams.userName" placeholder="输入用户名" allow-clear />
+      <a-form-item label="类型" name="category">
+        <a-input v-model:value="searchParams.category" placeholder="请输入类型" allow-clear />
+      </a-form-item>
+      <a-form-item label="标签" name="tags">
+        <a-select
+          v-model:value="searchParams.tags"
+          mode="tags"
+          placeholder="请输入标签"
+          style="min-width: 180px"
+          allow-clear
+        />
       </a-form-item>
       <a-form-item>
         <a-button type="primary" html-type="submit">搜索</a-button>
       </a-form-item>
     </a-form>
+
     <div style="margin-bottom: 16px"></div>
     <!--表格-->
     <a-table
@@ -19,51 +33,57 @@
       :data-source="dataList"
       :pagination="pagination"
       @change="doTableChange"
+      :scroll="{x: 'max-content' }"
     >
       <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'userName'">
-          <span v-if="!editing[record.id]">{{ record.userName }}</span>
-          <a-input v-model:value="record.userName" v-else />
+        <template v-if="column.dataIndex === 'url'">
+          <a-image :src="record.url" :width="120" />
         </template>
-        <template v-if="column.dataIndex === 'userAvatar'">
-          <a-avatar :src="record.userAvatar" :width="120" v-if="!editing[record.id]"/>
-          <a-input v-model:value="record.userAvatar" v-else />
+        <!-- 标签 -->
+        <template v-if="column.dataIndex === 'tags'">
+          <a-space wrap>
+            <a-tag v-for="tag in JSON.parse(record.tags || '[]')" :key="tag">{{ tag }}</a-tag>
+          </a-space>
         </template>
-        <template v-if="column.dataIndex === 'userProfile'">
-          <span v-if="!editing[record.id]">{{ record.userProfile }}</span>
-          <a-input v-model:value="record.userProfile" v-else />
+        <!-- 图片信息 -->
+        <template v-if="column.dataIndex === 'picInfo'">
+          <div>格式：{{ record.picFormat }}</div>
+          <div>宽度：{{ record.picWidth }}</div>
+          <div>高度：{{ record.picHeight }}</div>
+          <div>宽高比：{{ record.picScale }}</div>
+          <div>大小：{{ (record.picSize / 1024).toFixed(2) }}KB</div>
         </template>
-        <template v-if="column.dataIndex === 'userRole'">
-          <div v-if="!editing[record.id]">
-            <a-tag :color="record.userRole === 'admin'? 'green' : 'blue'">
-              {{ record.userRole === 'admin'? '管理员' : '普通用户' }}
-            </a-tag>
-          </div>
-          <a-select v-model:value="record.userRole" v-else>
-            <a-select-option value="admin">管理员</a-select-option>
-            <a-select-option value="user">普通用户</a-select-option>
-          </a-select>
-        </template>
-        <template v-if="column.dataIndex === 'createTime'">
+        <template v-else-if="column.dataIndex === 'createTime'">
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
-        <template v-if="column.dataIndex === 'updateTime'">
-          {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+        <template v-else-if="column.dataIndex === 'editTime'">
+          {{ dayjs(record.editTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
-        <template v-if="column.key === 'action'">
-          <a-button @click="toggleEdit(record.id)" :danger="editing[record.id]" >
-            {{ editing[record.id]? '保存' : '编辑' }}
-          </a-button>
-          <a-button danger @click="doDelete(record.id)" style="margin-left: 8px" v-if="!editing[record.id]">删除</a-button>
+        <template v-else-if="column.key === 'action'">
+          <a-space>
+            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank">编辑</a-button>
+            <a-button type="link" danger @click="doDelete(record.id)">删除</a-button>
+          </a-space>
+
         </template>
+        <a-space>
+
+
+        </a-space>
+
       </template>
+
     </a-table>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import { deleteUserUsingPost, listUserVoByPageUsingPost, updateUserUsingPost } from '@/api/userController.ts';
+import {
+  deletePictureUsingPost,
+  listPictureByPageUsingPost,
+  updatePictureUsingPost
+} from '@/api/PictureController.ts'
 import { message } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
@@ -71,39 +91,55 @@ const columns = [
   {
     title: 'id',
     dataIndex: 'id',
+    width: 80,
   },
   {
-    title: '账号',
-    dataIndex: 'userAccount',
+    title: '图片',
+    dataIndex: 'url',
   },
   {
-    title: '用户名',
-    dataIndex: 'userName',
-  },
-  {
-    title: '头像',
-    dataIndex: 'userAvatar',
+    title: '名称',
+    dataIndex: 'name',
   },
   {
     title: '简介',
-    dataIndex: 'userProfile',
+    dataIndex: 'introduction',
+    ellipsis: true,
   },
   {
-    title: '用户角色',
-    dataIndex: 'userRole',
+    title: '类型',
+    dataIndex: 'category',
+  },
+  {
+    title: '标签',
+    dataIndex: 'tags',
+  },
+  {
+    title: '图片信息',
+    dataIndex: 'picInfo',
+  },
+  {
+    title: '用户id',
+    dataIndex: 'PictureId',
+    width: 80,
   },
   {
     title: '创建时间',
     dataIndex: 'createTime',
   },
   {
+    title: '编辑时间',
+    dataIndex: 'editTime',
+  },
+  {
     title: '操作',
     key: 'action',
   },
-];
+]
+
 
 // 数据
-const dataList = ref<API.UserVO>([]);
+const dataList = ref<API.Picture>([]);
 const total = ref(0);
 const editing = ref<{ [key: string]: boolean }>({});
 
@@ -116,7 +152,7 @@ const doTableChange = (page: any) => {
 
 // 获取数据
 const fetchData = async () => {
-  const res = await listUserVoByPageUsingPost({
+  const res = await listPictureByPageUsingPost({
     ...searchParams
   });
   if (res.data.code === 0 && res.data.data) {
@@ -133,11 +169,11 @@ onMounted(() => {
 });
 
 // 搜索条件
-const searchParams = reactive<API.UserQueryRequest>({
+const searchParams = reactive<API.PictureQueryRequest>({
   current: 1,
   pageSize: 10,
   sortField: "createTime",
-  sortOrder: "ascend"
+  sortOrder: "descend"
 });
 
 // 分页参数
@@ -162,7 +198,7 @@ const doDelete = async (id: string) => {
   if (!id) {
     return;
   }
-  const res = await deleteUserUsingPost({ id });
+  const res = await deletePictureUsingPost({ id });
   if (res.data.code === 0) {
     message.success('删除成功');
     // 刷新数据
@@ -177,7 +213,7 @@ const toggleEdit = (id: string) => {
     // 保存编辑
     const record = dataList.value.find(item => item.id === id);
     if (record) {
-      updateUserUsingPost(record).then(res => {
+      updatePictureUsingPost(record).then(res => {
         if (res.data.code === 0) {
           message.success('保存成功');
           editing.value[id] = false;

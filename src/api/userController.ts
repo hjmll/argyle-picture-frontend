@@ -105,7 +105,7 @@ export async function userLogoutUsingPost(options?: { [key: string]: any }) {
   })
 }
 
-/** userResgister POST /api/user/register */
+/** userRegister POST /api/user/register */
 export async function userRegisterUsingPost(
   body: API.UserRegisterRequest,
   options?: { [key: string]: any }
