@@ -33,9 +33,12 @@
       :data-source="dataList"
       :pagination="pagination"
       @change="doTableChange"
-      :scroll="{x: 'max-content' }"
+      :scroll="{ x: 'max-content' }"
     >
       <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'name'">
+          {{record.name}}
+        </template>
         <template v-if="column.dataIndex === 'url'">
           <a-image :src="record.url" :width="120" />
         </template>
@@ -56,36 +59,30 @@
         <template v-else-if="column.dataIndex === 'createTime'">
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
-        <template v-else-if="column.dataIndex === 'editTime'">
-          {{ dayjs(record.editTime).format('YYYY-MM-DD HH:mm:ss') }}
-        </template>
+
         <template v-else-if="column.key === 'action'">
           <a-space>
-            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank">编辑</a-button>
+            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank"
+              >编辑</a-button
+            >
             <a-button type="link" danger @click="doDelete(record.id)">删除</a-button>
           </a-space>
-
         </template>
-        <a-space>
-
-
-        </a-space>
-
+        <a-space> </a-space>
       </template>
-
     </a-table>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue'
 import {
   deletePictureUsingPost,
   listPictureByPageUsingPost,
-  updatePictureUsingPost
+  updatePictureUsingPost,
 } from '@/api/PictureController.ts'
-import { message } from 'ant-design-vue';
-import dayjs from 'dayjs';
+import { message } from 'ant-design-vue'
+import dayjs from 'dayjs'
 
 const columns = [
   {
@@ -128,53 +125,48 @@ const columns = [
     dataIndex: 'createTime',
   },
   {
-    title: '编辑时间',
-    dataIndex: 'editTime',
-  },
-  {
     title: '操作',
     key: 'action',
   },
 ]
 
-
 // 数据
-const dataList = ref<API.Picture>([]);
-const total = ref(0);
-const editing = ref<{ [key: string]: boolean }>({});
+const dataList = ref<API.Picture>([])
+const total = ref(0)
+const editing = ref<{ [key: string]: boolean }>({})
 
 //表格变化之后重新获取数据
 const doTableChange = (page: any) => {
-  searchParams.current = page.current;
-  searchParams.pageSize = page.pageSize;
-  fetchData();
-};
+  searchParams.current = page.current
+  searchParams.pageSize = page.pageSize
+  fetchData()
+}
 
 // 获取数据
 const fetchData = async () => {
   const res = await listPictureByPageUsingPost({
-    ...searchParams
-  });
+    ...searchParams,
+  })
   if (res.data.code === 0 && res.data.data) {
-    dataList.value = res.data.data.records?? [];
-    total.value = res.data.data.total?? 0;
+    dataList.value = res.data.data.records ?? []
+    total.value = res.data.data.total ?? 0
   } else {
-    message.error('获取数据失败，' + res.data.message);
+    message.error('获取数据失败，' + res.data.message)
   }
-};
+}
 
 // 页面加载时请求一次
 onMounted(() => {
-  fetchData();
-});
+  fetchData()
+})
 
 // 搜索条件
 const searchParams = reactive<API.PictureQueryRequest>({
   current: 1,
   pageSize: 10,
-  sortField: "createTime",
-  sortOrder: "descend"
-});
+  sortField: 'createTime',
+  sortOrder: 'descend',
+})
 
 // 分页参数
 const pagination = computed(() => {
@@ -184,46 +176,46 @@ const pagination = computed(() => {
     total: total.value,
     showSizeChanger: true,
     showTotal: (total: number) => `共 ${total} 条`,
-  };
-});
+  }
+})
 
 const doSearch = () => {
   //重置页码
-  searchParams.current = 1;
-  fetchData();
-};
+  searchParams.current = 1
+  fetchData()
+}
 
 // 删除数据
 const doDelete = async (id: string) => {
   if (!id) {
-    return;
+    return
   }
-  const res = await deletePictureUsingPost({ id });
+  const res = await deletePictureUsingPost({ id })
   if (res.data.code === 0) {
-    message.success('删除成功');
+    message.success('删除成功')
     // 刷新数据
-    fetchData();
+    fetchData()
   } else {
-    message.error('删除失败');
+    message.error('删除失败')
   }
-};
+}
 
 const toggleEdit = (id: string) => {
   if (editing.value[id]) {
     // 保存编辑
-    const record = dataList.value.find(item => item.id === id);
+    const record = dataList.value.find((item) => item.id === id)
     if (record) {
-      updatePictureUsingPost(record).then(res => {
+      updatePictureUsingPost(record).then((res) => {
         if (res.data.code === 0) {
-          message.success('保存成功');
-          editing.value[id] = false;
+          message.success('保存成功')
+          editing.value[id] = false
         } else {
-          message.error('保存失败');
+          message.error('保存失败')
         }
-      });
+      })
     }
   } else {
-    editing.value[id] = true;
+    editing.value[id] = true
   }
-};
+}
 </script>

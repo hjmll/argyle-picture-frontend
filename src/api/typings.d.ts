@@ -5,6 +5,30 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseCategory_ = {
+    code?: number
+    data?: Category
+    message?: string
+  }
+
+  type BaseResponseCategoryVO_ = {
+    code?: number
+    data?: CategoryVO
+    message?: string
+  }
+
+  type BaseResponseListCategory_ = {
+    code?: number
+    data?: Category[]
+    message?: string
+  }
+
+  type BaseResponseListTag_ = {
+    code?: number
+    data?: Tag[]
+    message?: string
+  }
+
   type BaseResponseLoginUserVO_ = {
     code?: number
     data?: LoginUserVO
@@ -17,6 +41,12 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponsePageCategoryVO_ = {
+    code?: number
+    data?: PageCategoryVO_
+    message?: string
+  }
+
   type BaseResponsePagePicture_ = {
     code?: number
     data?: PagePicture_
@@ -26,6 +56,12 @@ declare namespace API {
   type BaseResponsePagePictureVO_ = {
     code?: number
     data?: PagePictureVO_
+    message?: string
+  }
+
+  type BaseResponsePageTagVO_ = {
+    code?: number
+    data?: PageTagVO_
     message?: string
   }
 
@@ -59,6 +95,18 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseTag_ = {
+    code?: number
+    data?: Tag
+    message?: string
+  }
+
+  type BaseResponseTagVO_ = {
+    code?: number
+    data?: TagVO
+    message?: string
+  }
+
   type BaseResponseUser_ = {
     code?: number
     data?: User
@@ -71,7 +119,47 @@ declare namespace API {
     message?: string
   }
 
+  type Category = {
+    createTime?: string
+    editTime?: string
+    id?: number
+    isDelete?: number
+    name?: string
+    updateTime?: string
+    usageCount?: number
+  }
+
+  type CategoryAddRequest = {
+    name?: string
+  }
+
+  type CategoryQueryRequest = {
+    current?: number
+    id?: number
+    name?: string
+    pageSize?: number
+    sortField?: string
+    sortOrder?: string
+  }
+
+  type CategoryUpdateRequest = {
+    id?: number
+    name?: string
+  }
+
+  type CategoryVO = true
+
   type DeleteRequest = {
+    id?: number
+  }
+
+  type getCategoryByIdUsingGETParams = {
+    /** id */
+    id?: number
+  }
+
+  type getCategoryVOByIdUsingGETParams = {
+    /** id */
     id?: number
   }
 
@@ -81,6 +169,16 @@ declare namespace API {
   }
 
   type getPictureVOByIdUsingGETParams = {
+    /** id */
+    id?: number
+  }
+
+  type getTagByIdUsingGETParams = {
+    /** id */
+    id?: number
+  }
+
+  type getTagVOByIdUsingGETParams = {
     /** id */
     id?: number
   }
@@ -107,6 +205,14 @@ declare namespace API {
     userRole?: string
   }
 
+  type PageCategoryVO_ = {
+    current?: number
+    pages?: number
+    records?: CategoryVO[]
+    size?: number
+    total?: number
+  }
+
   type PagePicture_ = {
     current?: number
     pages?: number
@@ -119,6 +225,14 @@ declare namespace API {
     current?: number
     pages?: number
     records?: PictureVO[]
+    size?: number
+    total?: number
+  }
+
+  type PageTagVO_ = {
+    current?: number
+    pages?: number
+    records?: TagVO[]
     size?: number
     total?: number
   }
@@ -214,6 +328,43 @@ declare namespace API {
     url?: string
     user?: UserVO
     userId?: number
+  }
+
+  type Tag = {
+    createTime?: string
+    editTime?: string
+    id?: number
+    isDelete?: number
+    name?: string
+    updateTime?: string
+    usageCount?: number
+  }
+
+  type TagAddRequest = {
+    name?: string
+  }
+
+  type TagQueryRequest = {
+    current?: number
+    id?: number
+    name?: string
+    pageSize?: number
+    sortField?: string
+    sortOrder?: string
+  }
+
+  type TagUpdateRequest = {
+    id?: number
+    name?: string
+  }
+
+  type TagVO = {
+    createTime?: string
+    editTime?: string
+    id?: number
+    name?: string
+    updateTime?: string
+    usageCount?: number
   }
 
   type testDownloadFileUsingGETParams = {

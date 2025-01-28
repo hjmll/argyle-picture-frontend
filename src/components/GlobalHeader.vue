@@ -79,6 +79,16 @@ const originItems = [
     title: '图片管理',
   },
   {
+    key: '/admin/categoryManage',
+    label: '分类管理',
+    title: '分类管理',
+  },
+  {
+    key: '/admin/tagManage',
+    label: '标签管理',
+    title: '标签管理',
+  },
+  {
     key: '/about',
     label: '关于',
     title: '关于',
