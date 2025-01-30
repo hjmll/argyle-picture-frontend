@@ -209,7 +209,7 @@ const handleAddSubmit = async () => {
       addModalVisible.value = false;
       fetchData();
     } else {
-      message.error('新增失败');
+      message.error('该分类已存在，新增失败');
     }
   } catch (error) {
     message.error('新增失败');

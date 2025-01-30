@@ -21,6 +21,16 @@
           allow-clear
         />
       </a-form-item>
+      <a-form-item label="审核状态" name="reviewStatus">
+        <a-select
+          v-model:value="searchParams.reviewStatus"
+          :options="PIC_REVIEW_STATUS_OPTIONS"
+          placeholder="请输入审核状态"
+          style="min-width: 180px"
+          allow-clear
+        />
+      </a-form-item>
+
       <a-form-item>
         <a-button type="primary" html-type="submit">搜索</a-button>
       </a-form-item>
@@ -36,11 +46,20 @@
       :scroll="{ x: 'max-content' }"
     >
       <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'id'">
+          {{record.id}}
+        </template>
         <template v-if="column.dataIndex === 'name'">
           {{record.name}}
         </template>
         <template v-if="column.dataIndex === 'url'">
           <a-image :src="record.url" :width="120" />
+        </template>
+        <template v-if="column.dataIndex === 'introduction'">
+          {{record.introduction}}
+        </template>
+        <template v-if="column.dataIndex === 'category'">
+          {{record.category}}
         </template>
         <!-- 标签 -->
         <template v-if="column.dataIndex === 'tags'">
@@ -56,19 +75,75 @@
           <div>宽高比：{{ record.picScale }}</div>
           <div>大小：{{ (record.picSize / 1024).toFixed(2) }}KB</div>
         </template>
+        <!-- 图片信息 -->
+        <template v-if="column.dataIndex === 'reviewMessage'">
+          <div>审核状态：{{ PIC_REVIEW_STATUS_MAP[record.reviewStatus] }}</div>
+          <div>审核信息：{{ record.reviewMessage }}</div>
+          <div>审核人：{{ record.reviewerId }}</div>
+          <div v-if="record.reviewTime">
+            审核时间：{{ dayjs(record.reviewTime).format('YYYY-MM-DD HH:mm:ss') }}
+          </div>
+        </template>
         <template v-else-if="column.dataIndex === 'createTime'">
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
 
         <template v-else-if="column.key === 'action'">
-          <a-space>
-            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank"
-              >编辑</a-button
+          <a-space wrap>
+            <a-button
+              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS"
+              type="link"
+              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.PASS)"
             >
-            <a-button type="link" danger @click="doDelete(record.id)">删除</a-button>
+              通过
+            </a-button>
+            <a-button
+              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
+              type="link"
+              danger
+              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)"
+            >
+              拒绝
+            </a-button>
+            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank"
+            >编辑
+            </a-button>
+            <!-- 删除按钮：添加确认提示 -->
+            <a-popconfirm
+              title="确定要删除这条记录吗？"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="doDelete(record.id)"
+            >
+              <a-button type="link" danger>删除</a-button>
+            </a-popconfirm>
           </a-space>
         </template>
-        <a-space> </a-space>
+
+        <template>
+          <!-- 审核原因模态框（仅用于拒绝操作） -->
+          <a-modal
+            v-model:visible="reviewModalVisible"
+            title="图片审核 - 拒绝"
+            @ok="handleConfirmReview"
+            @cancel="handleCancelReview"
+            :maskClosable="false"
+            :maskStyle="{ background: 'transparent' }"
+          >
+            <a-form :model="reviewForm">
+              <a-form-item
+                label="拒绝原因"
+                :rules="[{ required: true, message: '拒绝时必须填写原因' }]"
+              >
+                <a-textarea
+                  v-model:value="reviewForm.reviewMessage"
+                  placeholder="请输入拒绝原因（必填）"
+                  :rows="4"
+                />
+              </a-form-item>
+            </a-form>
+          </a-modal>
+        </template>
       </template>
     </a-table>
   </div>
@@ -77,12 +152,75 @@
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import {
-  deletePictureUsingPost,
+  deletePictureUsingPost, doPictureReviewUsingPost,
   listPictureByPageUsingPost,
-  updatePictureUsingPost,
+  updatePictureUsingPost
 } from '@/api/PictureController.ts'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import {
+  PIC_REVIEW_STATUS_ENUM,
+  PIC_REVIEW_STATUS_MAP,
+  PIC_REVIEW_STATUS_OPTIONS
+} from '../../components/constants/picture.ts'
+
+
+// 新增状态变量
+const reviewModalVisible = ref(false)
+const currentReviewStatus = ref<number>(PIC_REVIEW_STATUS_ENUM.PASS)
+const currentRecord = ref<API.Picture|null>(null)
+const reviewForm = reactive({
+  reviewMessage: '',
+})
+
+// 审核处理方法
+const handleReview = async (record: API.Picture, reviewStatus: number) => {
+  if (reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS) {
+    // 直接通过，无需弹框
+    const res = await doPictureReviewUsingPost({
+      id: record.id,
+      reviewStatus: PIC_REVIEW_STATUS_ENUM.PASS,
+      reviewMessage: '管理员操作通过', // 默认通过原因
+    })
+    if (res.data.code === 0) {
+      message.success('审核通过成功')
+      fetchData() // 刷新数据
+    } else {
+      message.error('审核操作失败，' + res.data.message)
+    }
+  } else {
+    // 拒绝操作，打开弹框填写原因
+    currentRecord.value = record
+    currentReviewStatus.value = reviewStatus
+    reviewForm.reviewMessage = '' // 重置输入框
+    reviewModalVisible.value = true
+  }
+}
+
+// 确认审核（仅用于拒绝操作）
+const handleConfirmReview = async () => {
+  if (!currentRecord.value) return
+
+  const res = await doPictureReviewUsingPost({
+    id: currentRecord.value.id,
+    reviewStatus: currentReviewStatus.value,
+    reviewMessage: reviewForm.reviewMessage || '管理员操作拒绝',
+  })
+
+  if (res.data.code === 0) {
+    message.success('审核拒绝成功')
+    reviewModalVisible.value = false
+    fetchData() // 刷新数据
+  } else {
+    message.error('审核操作失败，' + res.data.message)
+  }
+}
+
+// 取消审核
+const handleCancelReview = () => {
+  reviewModalVisible.value = false
+  currentRecord.value = null
+}
 
 const columns = [
   {
@@ -119,6 +257,10 @@ const columns = [
     title: '用户id',
     dataIndex: 'PictureId',
     width: 80,
+  },
+  {
+    title: '审核信息',
+    dataIndex: 'reviewMessage',
   },
   {
     title: '创建时间',
@@ -218,4 +360,21 @@ const toggleEdit = (id: string) => {
     editing.value[id] = true
   }
 }
+
+// const handleReview = async (record: API.Picture, reviewStatus: number) => {
+//   const reviewMessage = reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员操作通过' : '管理员操作拒绝'
+//   const res = await doPictureReviewUsingPost({
+//     id: record.id,
+//     reviewStatus,
+//     reviewMessage,
+//   })
+//   if (res.data.code === 0) {
+//     message.success('审核操作成功')
+//     // 重新获取列表
+//     fetchData()
+//   } else {
+//     message.error('审核操作失败，' + res.data.message)
+//   }
+// }
+
 </script>

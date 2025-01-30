@@ -50,6 +50,7 @@
               {{ formatSize(picture.picSize) }}
             </a-descriptions-item>
           </a-descriptions>
+
         <!--图片操作-->
           <a-space>
             <a-button type="primary" @click="doDownload">
@@ -60,22 +61,54 @@
             </a-button>
 
             <a-button v-if="canEdit" :icon="h(EditOutlined)" @click="doEdit">编辑</a-button>
-            <a-button v-if="canEdit" danger :icon="h(DeleteOutlined)" @click="doDelete">删除</a-button>
+            <a-popconfirm
+              title="确定要删除这条记录吗？"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="doDelete"
+            >
+              <a-button v-if="canEdit" danger :icon="h(DeleteOutlined)" >删除</a-button>
+            </a-popconfirm>
+            <!--<a-button v-if="canEdit" danger :icon="h(DeleteOutlined)" @click="doDelete">删除</a-button>-->
           </a-space>
-          <!--<a-space wrap>-->
-          <!--  <a-button v-if="canEdit" type="default" @click="doEdit">-->
-          <!--    编辑-->
-          <!--    <template #icon>-->
-          <!--      <EditOutlined />-->
-          <!--    </template>-->
-          <!--  </a-button>-->
-          <!--  <a-button v-if="canEdit" danger @click="doDelete">-->
-          <!--    删除-->
-          <!--    <template #icon>-->
-          <!--      <DeleteOutlined />-->
-          <!--    </template>-->
-          <!--  </a-button>-->
-          <!--</a-space>-->
+          <a-space style="margin-top: 16px">
+            <!-- 审核操作按钮（仅管理员可见） -->
+            <a-button
+              v-if="isAdmin && picture.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS"
+              type="primary"
+              @click="handleReview(PIC_REVIEW_STATUS_ENUM.PASS)"
+            >
+              通过
+            </a-button>
+            <a-button
+              v-if="isAdmin && picture.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
+              danger
+              @click="handleReview(PIC_REVIEW_STATUS_ENUM.REJECT)"
+            >
+              拒绝
+            </a-button>
+          </a-space>
+          <!-- 审核拒绝原因模态框 -->
+          <a-modal
+            v-model:visible="rejectModalVisible"
+            title="图片审核 - 拒绝"
+            @ok="handleConfirmReject"
+            @cancel="handleCancelReject"
+            :maskClosable="false"
+          >
+            <a-form :model="rejectForm">
+              <a-form-item
+                label="拒绝原因"
+                :rules="[{ required: true, message: '拒绝时必须填写原因' }]"
+              >
+                <a-textarea
+                  v-model:value="rejectForm.reviewMessage"
+                  placeholder="请输入拒绝原因（必填）"
+                  :rows="4"
+                />
+              </a-form-item>
+            </a-form>
+          </a-modal>
 
         </a-card>
       </a-col>
@@ -88,7 +121,7 @@
 import { computed, onMounted, reactive, ref ,h} from 'vue'
 import { message } from 'ant-design-vue'
 import {
-  deletePictureUsingPost,
+  deletePictureUsingPost, doPictureReviewUsingPost,
   getPictureVoByIdUsingGet,
   listPictureVoByPageUsingPost
 } from '@/api/pictureController.ts'
@@ -96,6 +129,7 @@ import { downloadImage, formatSize } from '@/utils'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import router from '@/router'
+import { PIC_REVIEW_STATUS_ENUM } from '@/components/constants/picture.ts'
 
 const dataList = ref<API.PictureVo[]>([])
 const total = ref(0)
@@ -110,6 +144,13 @@ const props = defineProps<Props>()
 
 const picture = ref<API.PictureVO>({})
 
+
+
+// 审核拒绝模态框状态
+const rejectModalVisible = ref(false)
+const rejectForm = reactive({
+  reviewMessage: '',
+})
 // 获取图片详情
 const fetchPictureDetail = async () => {
   try {
@@ -180,6 +221,77 @@ const canEdit = computed(() => {
   return loginUser.id === user.id || loginUser.userRole === 'admin'
 })
 
+// 是否是管理员
+const isAdmin = computed(() => {
+  return loginUserStore.loginUser?.userRole === 'admin'
+})
+
+// // 审核操作
+// const handleReview = async (reviewStatus: number) => {
+//   try {
+//     const res = await doPictureReviewUsingPost({
+//       id: picture.value.id,
+//       reviewStatus,
+//       reviewMessage: reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员操作通过' : '管理员操作拒绝',
+//     })
+//     if (res.data.code === 0) {
+//       message.success('审核操作成功')
+//       fetchPictureDetail() // 刷新图片详情
+//     } else {
+//       message.error('审核操作失败，' + res.data.message)
+//     }
+//   } catch (e: any) {
+//     message.error('审核操作失败：' + e.message)
+//   }
+// }
+
+// 审核操作
+const handleReview = (reviewStatus: number) => {
+  if (reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS) {
+    // 直接通过，无需弹框
+    handleConfirmReview(PIC_REVIEW_STATUS_ENUM.PASS)
+  } else {
+    // 拒绝操作，打开弹框填写原因
+    rejectModalVisible.value = true
+  }
+}
+
+// 确认审核通过
+const handleConfirmReview = async (reviewStatus: number) => {
+  try {
+    const res = await doPictureReviewUsingPost({
+      id: picture.value.id,
+      reviewStatus,
+      reviewMessage: reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS
+        ? '管理员操作通过'
+        : rejectForm.reviewMessage,
+    })
+    if (res.data.code === 0) {
+      message.success('审核操作成功')
+      rejectModalVisible.value = false // 关闭模态框
+      fetchPictureDetail() // 刷新图片详情
+    } else {
+      message.error('审核操作失败，' + res.data.message)
+    }
+  } catch (e: any) {
+    message.error('审核操作失败：' + e.message)
+  }
+}
+
+// 确认审核拒绝
+const handleConfirmReject = async () => {
+  if (!rejectForm.reviewMessage.trim()) {
+    message.error('拒绝时必须填写原因')
+    return
+  }
+  await handleConfirmReview(PIC_REVIEW_STATUS_ENUM.REJECT)
+}
+
+// 取消审核拒绝
+const handleCancelReject = () => {
+  rejectModalVisible.value = false
+  rejectForm.reviewMessage = '' // 清空原因
+}
 // 编辑
 const doEdit = () => {
   router.push('/add_picture?id=' + picture.value.id)

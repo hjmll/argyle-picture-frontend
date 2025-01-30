@@ -147,7 +147,14 @@ declare namespace API {
     name?: string
   }
 
-  type CategoryVO = true
+  type CategoryVO = {
+    createTime?: string
+    editTime?: string
+    id?: number
+    name?: string
+    updateTime?: string
+    usageCount?: number
+  }
 
   type DeleteRequest = {
     id?: number
@@ -291,11 +298,21 @@ declare namespace API {
     picScale?: number
     picSize?: number
     picWidth?: number
+    reviewMessage?: string
+    reviewStatus?: number
+    reviewTime?: string
+    reviewerId?: number
     searchText?: string
     sortField?: string
     sortOrder?: string
     tags?: string[]
     userId?: number
+  }
+
+  type PictureReviewRequest = {
+    id?: number
+    reviewMessage?: string
+    reviewStatus?: number
   }
 
   type PictureTagCategory = {
@@ -328,6 +345,7 @@ declare namespace API {
     url?: string
     user?: UserVO
     userId?: number
+    reviewStatus?: number
   }
 
   type Tag = {
