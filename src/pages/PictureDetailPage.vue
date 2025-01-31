@@ -226,24 +226,7 @@ const isAdmin = computed(() => {
   return loginUserStore.loginUser?.userRole === 'admin'
 })
 
-// // 审核操作
-// const handleReview = async (reviewStatus: number) => {
-//   try {
-//     const res = await doPictureReviewUsingPost({
-//       id: picture.value.id,
-//       reviewStatus,
-//       reviewMessage: reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员操作通过' : '管理员操作拒绝',
-//     })
-//     if (res.data.code === 0) {
-//       message.success('审核操作成功')
-//       fetchPictureDetail() // 刷新图片详情
-//     } else {
-//       message.error('审核操作失败，' + res.data.message)
-//     }
-//   } catch (e: any) {
-//     message.error('审核操作失败：' + e.message)
-//   }
-// }
+
 
 // 审核操作
 const handleReview = (reviewStatus: number) => {
