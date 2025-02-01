@@ -15,6 +15,38 @@
           allow-clear
         />
       </a-form-item>
+      <!-- 新增偏移量表单项 -->
+      <a-form-item
+        label="批次偏移量"
+        name="offset"
+        help="从第几张图片开始抓取（避免重复抓取）"
+      >
+        <a-input-number
+          v-model:value="formData.offset"
+          placeholder="请输入偏移量"
+          style="min-width: 180px"
+          :min="0"
+          :precision="0"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item label="分类" name="category">
+        <a-auto-complete
+          v-model:value="formData.category"
+          :options="categoryOptions"
+          placeholder="请输入分类"
+          allowClear
+        />
+      </a-form-item>
+      <a-form-item label="标签" name="tags">
+        <a-select
+          v-model:value="formData.tags"
+          :options="tagOptions"
+          mode="tags"
+          placeholder="请输入标签"
+          allowClear
+        />
+      </a-form-item>
       <a-form-item label="名称前缀" name="namePrefix">
         <a-input v-model:value="formData.namePrefix" placeholder="请输入名称前缀，会自动补充序号" />
       </a-form-item>
@@ -28,14 +60,18 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { uploadPictureByBatchUsingPost } from '@/api/pictureController.ts'
+import { listPictureTagCategoryUsingGet, uploadPictureByBatchUsingPost } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 
 const formData = reactive<API.PictureUploadByBatchRequest>({
   count: 10,
+  offset: 0,
 })
+
+const categoryOptions = ref<string[]>([])
+const tagOptions = ref<string[]>([])
 const loading = ref(false)
 
 const router = useRouter()
@@ -59,6 +95,33 @@ const handleSubmit = async (values: any) => {
   }
   loading.value = false
 }
+
+// 获取标签和分类选项
+const getTagCategoryOptions = async () => {
+  const res = await listPictureTagCategoryUsingGet()
+  if (res.data.code === 0 && res.data.data) {
+    // 转换成下拉选项组件接受的格式
+    tagOptions.value = (res.data.data.tagList ?? []).map((data: string) => {
+      return {
+        value: data,
+        label: data,
+      }
+    })
+    categoryOptions.value = (res.data.data.categoryList ?? []).map((data: string) => {
+      return {
+        value: data,
+        label: data,
+      }
+    })
+  } else {
+    message.error('获取标签分类列表失败，' + res.data.message)
+  }
+}
+
+onMounted(() => {
+  getTagCategoryOptions()
+})
+
 </script>
 
 <style scoped>

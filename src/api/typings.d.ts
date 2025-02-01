@@ -335,15 +335,20 @@ declare namespace API {
   }
 
   type PictureUploadByBatchRequest = {
+    category?: string
     count?: number
     namePrefix?: string
+    offset?: number
     searchText?: string
+    tags?: string[]
   }
 
   type PictureUploadRequest = {
+    category?: string
     fileUrl?: string
     id?: number
     picName?: string
+    tags?: string[]
   }
 
   type PictureVO = {
@@ -360,6 +365,7 @@ declare namespace API {
     picWidth?: number
     reviewStatus?: number
     tags?: string[]
+    thumbnailUrl?: string
     updateTime?: string
     url?: string
     user?: UserVO
@@ -409,9 +415,11 @@ declare namespace API {
   }
 
   type uploadPictureUsingPOSTParams = {
+    category?: string
     fileUrl?: string
     id?: number
     picName?: string
+    tags?: string[]
   }
 
   type User = {
