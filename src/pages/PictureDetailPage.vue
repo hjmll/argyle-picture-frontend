@@ -81,7 +81,7 @@
               通过
             </a-button>
             <a-button
-              v-if="isAdmin && picture.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
+              v-if="isAdmin && picture.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT && picture.spaceId == null"
               danger
               @click="handleReview(PIC_REVIEW_STATUS_ENUM.REJECT)"
             >
@@ -129,7 +129,7 @@ import { downloadImage, formatSize } from '@/utils'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import router from '@/router'
-import { PIC_REVIEW_STATUS_ENUM } from '@/components/constants/picture.ts'
+import { PIC_REVIEW_STATUS_ENUM } from '@/constants/picture.ts'
 
 const dataList = ref<API.PictureVo[]>([])
 const total = ref(0)
@@ -277,7 +277,13 @@ const handleCancelReject = () => {
 }
 // 编辑
 const doEdit = () => {
-  router.push('/add_picture?id=' + picture.value.id)
+  router.push({
+    path: '/add_picture',
+    query: {
+      id: picture.value.id,
+      spaceId: picture.value.spaceId,
+    },
+  })
 }
 // 删除
 const doDelete = async () => {

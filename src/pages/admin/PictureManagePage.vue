@@ -171,7 +171,7 @@ import {
   PIC_REVIEW_STATUS_ENUM,
   PIC_REVIEW_STATUS_MAP,
   PIC_REVIEW_STATUS_OPTIONS
-} from '../../components/constants/picture.ts'
+} from '@/constants/picture.ts'
 
 
 // 新增状态变量
@@ -297,7 +297,9 @@ const doTableChange = (page: any) => {
 const fetchData = async () => {
   const res = await listPictureByPageUsingPost({
     ...searchParams,
+    nullSpaceId: true,
   })
+
   if (res.data.code === 0 && res.data.data) {
     dataList.value = res.data.data.records ?? []
     total.value = res.data.data.total ?? 0
