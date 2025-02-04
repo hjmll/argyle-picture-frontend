@@ -49,6 +49,7 @@
             <a-descriptions-item label="大小">
               {{ formatSize(picture.picSize) }}
             </a-descriptions-item>
+
           </a-descriptions>
 
         <!--图片操作-->

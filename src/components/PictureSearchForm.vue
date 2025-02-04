@@ -62,6 +62,8 @@
       </a-form-item>
 
     </a-form>
+
+
   </div>
 
 </template>
@@ -70,7 +72,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
-import { listPictureTagCategoryUsingGet } from '@/api/pictureController.ts'
+import { listPictureTagCategoryUsingGet, searchPictureByColorUsingPost } from '@/api/pictureController.ts'
 
 interface Props {
   onSearch?: (searchParams: API.PictureQueryRequest) => void
@@ -148,6 +150,7 @@ const doClear = () => {
   dateRange.value = []
   props.onSearch?.(searchParams)
 }
+
 
 
 </script>
