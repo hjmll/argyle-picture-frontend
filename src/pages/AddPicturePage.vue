@@ -24,6 +24,14 @@
           AI 扩图
         </a-button>
       </a-space>
+      <ImageCropper
+        ref="imageCropperRef"
+        :imageUrl="picture?.url"
+        :picture="picture"
+        :spaceId="spaceId"
+        :space="space"
+        :onSuccess="onCropSuccess"
+      />
       <ImageOutPainting
         ref="imageOutPaintingRef"
         :picture="picture"
@@ -191,10 +199,8 @@ onMounted(() => {
 const imageCropperRef = ref()
 
 // 编辑图片
-const doEditPicture = () => {
-  if (imageCropperRef.value) {
-    imageCropperRef.value.openModal()
-  }
+const doEditPicture = async () => {
+  imageCropperRef.value?.openModal()
 }
 
 // 编辑成功事件
