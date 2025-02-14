@@ -86,7 +86,7 @@
 
 <script setup lang="ts">
 // 数据
-import { onMounted, reactive, ref, h, watch, computed } from 'vue'
+import { onMounted, ref, h, watch, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import { formatSize } from '@/utils'
