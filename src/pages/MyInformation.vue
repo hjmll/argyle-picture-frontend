@@ -9,8 +9,11 @@
         :before-upload="beforeAvatarUpload"
         @change="handleAvatarChange"
       >
-        <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar" />
-        <el-icon v-else class="avatar-icon"><Plus /></el-icon>
+      
+        <!-- 修改 img 样式，添加 class -->
+        <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar round-avatar" />
+        <!-- 修改 el-icon 样式，添加 class -->
+        <el-icon v-else class="avatar-icon round-avatar"><Plus /></el-icon>
       </el-upload>
     </div>
 
@@ -40,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import {onBeforeMount, onMounted, reactive, ref } from 'vue';
 import type { FormInstance, UploadFile } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
@@ -48,22 +51,29 @@ import { useLoginUserStore } from '@/stores/useLoginUserStore.ts';
 
 const loginUserStore = useLoginUserStore();
 
-
-onMounted(async () => {
+onBeforeMount(() => {
+  // 从 localStorage 中读取用户名
+  const storedUserName = localStorage.getItem('userName'); 
+  console.log(storedUserName);
+  userInfo.nickname = storedUserName || '';
+})
+onMounted(() => {
   try {
-    await loginUserStore.fetchLoginUser();
+    const res = loginUserStore.loginUser;
     // 从 localStorage 中读取用户名
     const storedUserName = localStorage.getItem('userName');
     if (storedUserName) {
       userInfo.nickname = storedUserName;
       res.userName = storedUserName;
+      console.log(storedUserName);
+      loginUserStore.setLoginUser(res);
     }
   } catch (error) {
     console.error('获取用户信息失败:', error);
   }
 })
 const loginUser = loginUserStore.loginUser;
-console.log(loginUser);
+
 const res=loginUser;
 // 修改 
 function updateUserName(){
@@ -72,13 +82,16 @@ function updateUserName(){
   console.log(loginUser);
   // 将修改后的用户名存储到 localStorage 中
   localStorage.setItem('userName', userInfo.nickname);
+  localStorage.setItem('avatar', userInfo.avatar);
+        res.userAvatar = userInfo.avatar;
+        loginUserStore.setLoginUser(res);
+  ElMessage.success('保存修改成功');
 }
-// 用于绑定输入框的值
-const newUserName = ref('');
 // 初始化用户信息
 const userInfo = reactive<UserInfo>({
   avatar: loginUser.userAvatar,
-  nickname: loginUser.userName,
+  nickname: localStorage.getItem('userName'),
+  
 });
 
 const splitDateTime = (dateTimeStr: string) => {
@@ -127,6 +140,7 @@ const handleAvatarChange = (file: UploadFile) => {
     reader.onload = (e) => {
       if (e.target?.result) {
         userInfo.avatar = e.target.result as string;
+       
       }
     };
     reader.readAsDataURL(file.raw);
@@ -189,5 +203,9 @@ const submitForm = async () => {
   background-color: #000;
   border-color: #000;
   color: #fff;
+}
+.round-avatar {
+  border-radius: 50%;
+  object-fit: cover; /* 确保图片填充整个圆形区域 */
 }
 </style>

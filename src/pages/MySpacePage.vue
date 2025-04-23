@@ -36,9 +36,9 @@ const checkUserSpace = async () => {
   if (res.data.code === 0) {
     if (res.data.data?.records?.length > 0) {
       const space = res.data.data.records[0]
-      router.replace(`/space/${space.id}`)
+      router.push(`/space/${space.id}`)
     } else {
-      router.replace('/add_space')
+      router.push('/add_space')
       message.warn('请先创建空间')
     }
   } else {

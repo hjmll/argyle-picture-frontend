@@ -70,5 +70,6 @@ console.log(loginUser.userName);
   left: 0;
   right: 0;
   text-align: center;
+  z-index: 1000;
 }
 </style>

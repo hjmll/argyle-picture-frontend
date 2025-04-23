@@ -1,11 +1,13 @@
 <template>
   <div id="globalSider">
     <el-aside v-if="loginUserStore.loginUser.id" width="200px">
+      <!-- 设置激活文字颜色和菜单背景颜色 -->
       <el-menu
         mode="vertical"
         :default-active="current"
         @select="doMenuClick"
-         :key="current"
+        :key="current"
+        
       >
         <!-- 固定菜单 -->
         <template v-for="item in fixedMenuItems" :key="item.key">
@@ -16,7 +18,6 @@
           </el-menu-item>
         </template>
         <!-- 团队空间菜单组 -->
-      
       </el-menu>
     </el-aside>
   </div>
@@ -110,7 +111,5 @@ watchEffect(() => {
 #globalSider {
   background: none;
 }
-
-/* 修改选中菜单项的样式 */
 
 </style>    

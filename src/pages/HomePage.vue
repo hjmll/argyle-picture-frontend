@@ -71,7 +71,7 @@ import {
 
 //懂啊啊啊啊啊啊啊啊啊啊啊啊啊啊
 
-const dataList = ref<API.PictureVo[]>([])
+const dataList = "11"//ref<API.PictureVo[]>([])
 const total = ref(0)
 const loading = ref(true)
 const scrollToTop = () => {
@@ -151,7 +151,7 @@ const categoryList = ref<string[]>([])
 const selectedCategory = ref<string>('all')
 
 //懂啊啊啊啊啊啊啊啊啊啊啊啊啊啊aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-const tagList = "这个号"//ref<string[]>([])
+const tagList = ref<string[]>([])
 const selectedTagList = ref<string[]>([])
 
 // 获取标签和分类选项

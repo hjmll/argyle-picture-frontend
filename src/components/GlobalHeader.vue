@@ -4,8 +4,8 @@
       <a-col flex="200px">
         <router-link to="/">
           <div class="title-bar">
-            <img class="logo" src="../assets/logo.png" alt="logo" />
-            <div class="title">映象视界</div>
+            <img class="logo" src="../../public/fdc3e171200c4e0c628f2de1714c2de6.jpg" alt="logo" />
+            <div class="title animated-title">映象视界</div>
           </div>
         </router-link>
       </a-col>
@@ -257,7 +257,6 @@ const handleMouseUp = () => {
     }
   }
 };
-
 onMounted(() => {
  
   if (headerRef.value) {
@@ -421,6 +420,16 @@ watch(() => loginUserStore.loginUser, (newUser) => {
   border-width: 0px;
   border-color: black;
   background-color: #000;
+}
+.title.animated-title {
+  color: #FF5733; 
+  font-weight: bold;
+  transition: all 0.3s ease; /* 添加过渡效果，让变化更平滑 */
+}
+
+.title.animated-title:hover {
+  color: #0099ff; /* 鼠标悬停时的文字颜色 */
+  transform: scale(1.1); /* 鼠标悬停时轻微放大 */
 }
 </style>
 
