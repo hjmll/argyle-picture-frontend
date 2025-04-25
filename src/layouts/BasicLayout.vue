@@ -4,7 +4,7 @@
       <a-layout-header class="header"><GlobalHeader /></a-layout-header>
       <!-- 使用 a-layout-sider 明确侧边栏 -->
       <a-layout>
-        <a-layout-sider class="sider" width="200" v-if="loginUserStore.loginUser.id"> 
+        <a-layout-sider class="sider" width="200" v-if="loginUserStore.loginUser.id">
           <GlobalSider />
         </a-layout-sider>
         <a-layout-content class="content">
@@ -12,7 +12,7 @@
         </a-layout-content>
       </a-layout>
       <a-layout-footer class="footer">
-        <a href="https://github.com/hjmll" target="_blank"> 映象视界 by hjm </a>
+        <a href="https://github.com/hjmll" target="_blank"> 映象视界 </a>
       </a-layout-footer>
     </a-layout>
   </div>
