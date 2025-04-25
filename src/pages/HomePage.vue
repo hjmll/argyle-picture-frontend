@@ -69,9 +69,9 @@ import {
   RocketOutlined
 } from '@ant-design/icons-vue';
 
-//懂啊啊啊啊啊啊啊啊啊啊啊啊啊啊
 
-const dataList = "11"//ref<API.PictureVo[]>([])
+
+const dataList = ref<API.PictureVo[]>([])
 const total = ref(0)
 const loading = ref(true)
 const scrollToTop = () => {
@@ -125,6 +125,7 @@ const fetchData = async () => {
       params.tags.push(tagList.value[index])
     }
   })
+  
   const res = await listPictureVoByPageUsingPost(params)
   if (res.data.data) {
     dataList.value = res.data.data.records ?? []
@@ -150,7 +151,7 @@ const doSearch = () => {
 const categoryList = ref<string[]>([])
 const selectedCategory = ref<string>('all')
 
-//懂啊啊啊啊啊啊啊啊啊啊啊啊啊啊aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
 const tagList = ref<string[]>([])
 const selectedTagList = ref<string[]>([])
 

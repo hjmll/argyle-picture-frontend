@@ -7,7 +7,7 @@
     <div class="vipinfor">
             <!-- 修改后的视频标签 -->
              <div class="video-container">
-            <video src="D:\jishe\argyle-picture-frontend-master\mypic\13389032_3840_2160_30fps.mp4" style="width: 100%; height: 100%; object-fit: cover;" autoplay="autoplay" loop="loop" muted="muted"></video>
+            <video src="../../mypic/13389032_3840_2160_30fps.mp4" style="width: 100%; height: 100%; object-fit: cover;" autoplay="autoplay" loop="loop" muted="muted"></video>
              
             <div class="video-center-text">选择我们<CheckOutlined /><br>
 
@@ -97,7 +97,6 @@ const handleSubmit = async () => {
     message.error('请输入兑换码')
     return
   }
-
   loading.value = true
 
   try {
