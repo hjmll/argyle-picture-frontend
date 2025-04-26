@@ -20,8 +20,7 @@
             <router-link 
               style="text-decoration: none;
               color: #000; 
-              
-              border: 1px solid transparent;
+             
               transition: all 0.3s ease;
               font-size: 16px;
               "
@@ -413,13 +412,18 @@ watch(() => loginUserStore.loginUser, (newUser) => {
   border: 1px solid transparent;
   border-radius: 30px;
   display: inline-block;
-  padding: 0.1px 20px;
+  padding: 0px 20px;
 }
 
 .active-border {
-  border-width: 0px;
-  border-color: black;
+  /* 修改上下边框宽度，这里设置为 1px，你可以按需调整 */
+  border-width: 0.001px 0; 
   background-color: #000;
+  height: 55px;
+  text-align: center;
+  /* 添加以下代码实现字体居中 */
+  line-height: 55px;
+  margin-top: 10px ;
 }
 .title.animated-title {
   color: #FF5733; 

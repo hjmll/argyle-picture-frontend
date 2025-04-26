@@ -1,36 +1,76 @@
 <template>
-  <div id="globalSider">
-    <el-aside v-if="loginUserStore.loginUser.id" width="200px">
-      <!-- 设置激活文字颜色和菜单背景颜色 -->
-      <el-menu
-        mode="vertical"
-        :default-active="current"
-        @select="doMenuClick"
-        :key="current"
-        
-      >
-        <!-- 固定菜单 -->
-        <template v-for="item in fixedMenuItems" :key="item.key">
-          <el-menu-item :index="item.key">
-            <template #title>
-              <el-icon><icon-menu /></el-icon><span>{{ item.label }}</span>
-            </template>
-          </el-menu-item>
+  <div id="globalSider" ref="siderRef">
+    <el-button 
+      @click="isCollapse = !isCollapse"
+      :class="['no-border-button', { 'expanded-button': !isCollapse, 'collapsed-button': isCollapse }]"
+    >
+      <el-icon>
+        <!-- 根据 isCollapse 状态动态显示图标 -->
+        <template v-if="isCollapse">
+          <ArrowRightBold />
         </template>
-        <!-- 团队空间菜单组 -->
-      </el-menu>
-    </el-aside>
+        <template v-else>
+          <el-icon><ArrowLeftBold /></el-icon><el-icon><ArrowLeftBold /></el-icon><el-icon><ArrowLeftBold /></el-icon>收回
+        </template>
+      </el-icon>
+    </el-button>
+  <el-menu
+    default-active="2"
+    class="el-menu-vertical-demo custom-menu" 
+    :collapse="isCollapse"
+    @open="handleOpen"
+    @close="handleClose"
+  >
+    <!-- 原有的菜单项，修改 index 属性并添加 @click 事件 -->
+    <el-menu-item :index="fixedMenuItems[0].key" @click="doMenuClick(fixedMenuItems[0].key)">
+      <el-icon><IconMenu /></el-icon>
+      <template #title>公共图库</template>
+    </el-menu-item>
+    <el-menu-item :index="fixedMenuItems[1].key" @click="doMenuClick(fixedMenuItems[1].key)">
+      <el-icon><Document /></el-icon>
+      <template #title>我的空间</template>
+    </el-menu-item>
+    <el-menu-item :index="fixedMenuItems[2].key" @click="doMenuClick(fixedMenuItems[2].key)">
+      <el-icon><Setting /></el-icon>
+      <template #title>创建团队</template>
+    </el-menu-item>
+  </el-menu>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect,watch,defineEmits} from 'vue'
 import { useRouter } from 'vue-router'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
-import { SPACE_TYPE_ENUM } from '@/constants/space.ts'
-import { listMyTeamSpaceUsingPost } from '@/api/spaceUserController.ts'
+// 移除 .ts 扩展名
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
+import { SPACE_TYPE_ENUM } from '@/constants/space'
+import { listMyTeamSpaceUsingPost } from '@/api/spaceUserController'
 import { ElMessage } from 'element-plus'
+import {
+  ArrowLeftBold,
+  ArrowRightBold,
+  Document,
+  Menu as IconMenu,
+  Setting,
+  DArrowRight,
+  DArrowLeft,
+} from '@element-plus/icons-vue'
+const emit = defineEmits(['isCollapse'])
+const handleOpen = (key: string, keyPath: string[]) => {
+  console.log(key, keyPath)
+}
+const handleClose = (key: string, keyPath: string[]) => {
+  console.log(key, keyPath)
+}
+// 修改初始值为 false，让侧边栏默认展开
+const isCollapse = ref(false)
+// 定义 ref 引用侧边栏元素
 
+watch(isCollapse,(New, Old)=>{
+  emit('isCollapse',New)
+
+	console.log(`新值:${New} ——— 老值:${Old}`)
+})
 // 固定的菜单列表
 const fixedMenuItems = [
   {
@@ -111,5 +151,34 @@ watchEffect(() => {
 #globalSider {
   background: none;
 }
+.el-menu-vertical-demo:not(.el-menu--collapse) {
+  width: 200px;
+  min-height: 400px;
+  height: 100vh;
+}
 
+/* 新增样式，去掉按钮边框 */
+.no-border-button {
+  border: none;
+  padding: 0; 
+  background: transparent; 
+}
+
+/* 菜单栏展开时按钮的样式 */
+.expanded-button {
+  width: 200px; /* 可根据实际情况调整 */
+  text-align: left; /* 让内容靠左显示 */
+}
+
+/* 菜单栏折叠时按钮的样式 */
+.collapsed-button {
+  width: 65px; /* 可根据实际情况调整 */
+}
+
+/* 激活菜单项的样式 */
+.custom-menu .el-menu-item.is-active {
+  border: 1px solid #000;
+  color: #fff;
+  background-color: #000;
+}
 </style>    

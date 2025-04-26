@@ -4,8 +4,13 @@
       <a-layout-header class="header"><GlobalHeader /></a-layout-header>
       <!-- 使用 a-layout-sider 明确侧边栏 -->
       <a-layout>
-        <a-layout-sider class="sider" width="200" v-if="loginUserStore.loginUser.id"> 
-          <GlobalSider />
+        <a-layout-sider 
+          class="sider"  
+          v-if="loginUserStore.loginUser.id" 
+          :width="siderCollapsed ? 65 : 200"
+        > 
+          <!-- 绑定处理方法到事件 -->
+          <GlobalSider @isCollapse="handleSiderCollapse" />
         </a-layout-sider>
         <a-layout-content class="content">
           <router-view />
@@ -22,17 +27,26 @@
 import GlobalHeader from '@/components/GlobalHeader.vue'
 import GlobalSider from '@/components/GlobalSider.vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const loginUserStore = useLoginUserStore();
 
+// 定义变量存储侧边栏折叠状态
+const siderCollapsed = ref(false);
+
+// 定义处理方法
+const handleSiderCollapse = (collapsed: boolean) => {
+  siderCollapsed.value = collapsed;
+  console.log('侧边栏折叠状态:', siderCollapsed.value);
+};
 
 onMounted(async () => {
   try {
     await loginUserStore.fetchLoginUser();
   } catch (error) {
     console.error('获取用户信息失败:', error);
-}})
+  }
+});
 const loginUser = loginUserStore.loginUser;
 console.log(loginUser.userName);
 </script>
