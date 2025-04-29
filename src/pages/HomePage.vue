@@ -1,7 +1,7 @@
 <template>
   <div id="homePage">
     <!-- 搜索框 -->
-    <div class="search-background">
+    <div :style="style">
       <div class="search-mask"></div>
     <div class="search-bar">
       <h2 style="text-align: center; color: white; margin-bottom: 30px; ">才华横溢的作者在这里免费分享最精彩的素材图片</h2>
@@ -68,7 +68,17 @@ import {
   SearchOutlined,
   RocketOutlined
 } from '@ant-design/icons-vue';
-
+const style = ref({
+  // 修改为驼峰命名法并将 url 作为字符串处理
+  backgroundImage: `url('../mypic/pexels-tom-fly-2150802027-31410286.jpg')`, 
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  borderRadius: '4px',
+  height: '60vh',
+  display: 'flex',
+  alignItems: 'center',
+  position: 'relative' // 为蒙版定位
+})
 
 
 const dataList = ref<API.PictureVo[]>([])
@@ -97,7 +107,7 @@ onUnmounted(() => {
 // 搜索条件
 const searchParams = reactive<API.PictureQueryRequest>({
   current: 1,
-  pageSize: 15,
+  pageSize: 18,
   sortField: 'createTime',
   sortOrder: 'descend',
 })

@@ -59,7 +59,7 @@
       <!-- AI 扩图功能板块 -->
       <div class="intro-sub-section">
         <h3 class="sub-section-title">AI 扩图功能</h3>
-        <p class="text-style">映象视界引入了先进的人工智能技术，支持强大的 AI 扩图功能。借助深度学习算法，该功能能够智能地对图片进行无损放大，不仅保持图片的清晰度和细节，还能自动优化色彩和纹理。无论您是需要将小尺寸的缩略图放大用于印刷，还是为设计作品提供更高分辨率的素材，AI 扩图功能都能轻松应对。</p>
+        <p class="text-style">映象视界引入了阿里云百炼大模型，支持强大的 AI 扩图功能。借助深度学习算法，该功能能够智能地对图片进行无损放大，不仅保持图片的清晰度和细节，还能自动优化色彩和纹理。无论您是需要将小尺寸的缩略图放大用于印刷，还是为设计作品提供更高分辨率的素材，AI 扩图功能都能轻松应对。</p>
       </div>
       <!-- 空间分析功能板块 -->
       <div class="intro-sub-section">
@@ -105,8 +105,8 @@
       <h2 class="underline-animation">联系我们</h2>
       <p class="text-style">如果您有任何问题、建议或合作意向，欢迎随时联系我们：</p>
       <ul>
-        <li>邮箱：<a href="mailto:support@argylegallery.com">xxx</a></li>
-        <li>电话：+86 123 456 7890</li>
+        <li>邮箱：<a href="mailto:support@argylegallery.com">3147540378@qq.com</a></li>
+        <li>电话：+86 19308460067</li>
         <li>社交媒体：<a href="https://www.facebook.com/argylegallery" target="_blank">Facebook</a> | <a href="https://www.twitter.com/argylegallery" target="_blank">Twitter</a></li>
       </ul>
     </section>
@@ -227,10 +227,33 @@ onUnmounted(() => {
 .carousel-container {
   position: relative;
   width: 100%;
-  height: 500px; /* 增加高度 */
+  height: 500px; 
   overflow: hidden;
   margin-bottom: 2rem;
-  perspective: 1500px; /* 增加透视效果 */
+  perspective: 2000px; 
+  background:white;
+}
+
+.carousel-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  animation: ripple 10s infinite;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
 }
 
 /* 图片列表 */

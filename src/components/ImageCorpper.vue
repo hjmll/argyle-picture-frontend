@@ -34,7 +34,16 @@
         <a-button @click="rotateRight" :disabled="!canEdit">向右旋转</a-button>
         <a-button @click="changeScale(1)" :disabled="!canEdit">放大</a-button>
         <a-button @click="changeScale(-1)" :disabled="!canEdit">缩小</a-button>
-        <a-button type="primary" :loading="loading" :disabled="!canEdit" @click="handleConfirm"
+        <a-button type="primary"  style="
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-align: center; 
+            background-color: #000;
+            color: #fff;
+            border: none;
+          " :loading="loading" :disabled="!canEdit" @click="handleConfirm"
         >确认
         </a-button>
       </a-space>
@@ -151,7 +160,7 @@ const handleUpload = async ({ file }: any) => {
 
 // --------- 实时编辑 ---------
 const loginUserStore = useLoginUserStore()
-let loginUser = loginUserStore.loginUser
+const loginUser = loginUserStore.loginUser
 // 正在编辑的用户
 const editingUser = ref<API.UserVO>()
 // 没有用户正在编辑中，可进入编辑

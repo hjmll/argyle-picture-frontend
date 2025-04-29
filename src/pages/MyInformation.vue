@@ -26,7 +26,17 @@
         <el-input v-model="loginUser.userAccount" disabled />
       </el-form-item>
       <el-form-item label="id号">
-        <el-input v-model="loginUser.id" disabled />
+        <el-input v-model="loginUser.id" disabled>
+          <!-- 使用 append 插槽将复制按钮放在输入框后方 -->
+          <template #append>
+            <el-button
+              :icon="CopyDocument"
+              @click="copyId"
+              circle
+              size="small"
+            ></el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="注册时间">
         <el-input v-model="riqi"  disabled/>
@@ -46,7 +56,7 @@
 import {onBeforeMount, onMounted, reactive, ref } from 'vue';
 import type { FormInstance, UploadFile } from 'element-plus';
 import { ElMessage } from 'element-plus';
-import { Plus } from '@element-plus/icons-vue';
+import { Plus,CopyDocument } from '@element-plus/icons-vue';
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts';
 
 const loginUserStore = useLoginUserStore();
@@ -159,6 +169,21 @@ const submitForm = async () => {
     }, 1000);
   } catch (error) {
     console.error('表单验证失败:', error);
+  }
+};
+
+// 复制 id 号的方法
+const copyId = () => {
+  const id = loginUser.id;
+  if (id) {
+    navigator.clipboard.writeText(id.toString())
+      .then(() => {
+        ElMessage.success('ID 号已复制到剪贴板');
+      })
+      .catch((error) => {
+        console.error('复制失败:', error);
+        ElMessage.error('复制失败，请稍后重试');
+      });
   }
 };
 </script>

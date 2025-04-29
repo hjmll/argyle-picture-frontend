@@ -1,5 +1,5 @@
 <template>
-  <div class="background">
+  <div :style="background">
     <!-- 添加蒙版元素 -->
     <div class="overlay"></div>
     <div id="userLoginPage">
@@ -53,7 +53,18 @@ import { userLoginUsingPost } from '@/api/userController'
 import { message } from 'ant-design-vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
-import { reactive } from 'vue'
+import { reactive,ref} from 'vue'
+
+const background = ref({
+  // 使用驼峰命名法，将 url 作为字符串处理
+  backgroundImage: `url("../mypic/pexels-kuma-jio-2150949207-31416365.jpg")`,
+  backgroundPosition: 'center center',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: 'cover',
+  width: '100%',
+  minHeight: '100vh',
+  position: 'relative' // 为蒙版定位做准备
+})
 
 const formState = reactive<{
   userAccount: string;
