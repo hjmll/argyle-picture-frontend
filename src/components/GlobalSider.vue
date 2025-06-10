@@ -30,7 +30,8 @@
       <el-icon><Document /></el-icon>
       <template #title>我的空间</template>
     </el-menu-item>
-    <el-menu-item :index="fixedMenuItems[2].key" @click="doMenuClick(fixedMenuItems[2].key)">
+    <!-- 修改点击事件，根据 menuItems 是否存在决定跳转逻辑 -->
+    <el-menu-item :index="fixedMenuItems[2].key" @click="handleMenuItemClick">
       <el-icon><Setting /></el-icon>
       <template #title>创建团队</template>
     </el-menu-item>
@@ -39,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect,watch,defineEmits} from 'vue'
+import { computed, ref, watchEffect,watch,defineEmits, onMounted, onBeforeUnmount} from 'vue'
 import { useRouter } from 'vue-router'
 // 移除 .ts 扩展名
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
@@ -52,8 +53,6 @@ import {
   Document,
   Menu as IconMenu,
   Setting,
-  DArrowRight,
-  DArrowLeft,
 } from '@element-plus/icons-vue'
 const emit = defineEmits(['isCollapse'])
 const handleOpen = (key: string, keyPath: string[]) => {
@@ -100,16 +99,14 @@ router.afterEach((to) => {
 
 // 路由跳转事件
 const doMenuClick = (key: string) => {
+  fetchTeamSpaceList()
   router.push(key)
 }
 
 const teamSpaceList = ref<API.SpaceUserVO[]>([])
-const menuItems = computed(() => {
-  // 没有团队空间，只展示固定菜单
-  if (teamSpaceList.value.length < 1) {
-    return fixedMenuItems
-  }
-  // 展示团队空间分组
+
+// 修改 menuItems 计算属性，返回包含 teamSpaceSubMenus 的对象
+const menuInfo = computed(() => {
   const teamSpaceSubMenus = teamSpaceList.value.map((spaceUser) => {
     const space = spaceUser.space
     return {
@@ -117,14 +114,33 @@ const menuItems = computed(() => {
       label: space?.spaceName,
     }
   })
-  const teamSpaceMenuGroup = {
-    type: 'group',
-    label: '我的团队',
-    key: 'teamSpace',
-    children: teamSpaceSubMenus,
+  let menuItems = fixedMenuItems
+  if (teamSpaceList.value.length > 0) {
+    const teamSpaceMenuGroup = {
+      type: 'group',
+      label: '我的团队',
+      key: 'teamSpace',
+      children: teamSpaceSubMenus,
+    }
+    menuItems = [...fixedMenuItems, teamSpaceMenuGroup]
   }
-  return [...fixedMenuItems, teamSpaceMenuGroup]
+  return {
+    menuItems,
+    teamSpaceSubMenus
+  }
 })
+
+// 使用时通过 menuInfo.value.menuItems 获取菜单项，通过 menuInfo.value.teamSpaceSubMenus 获取子菜单项
+const handleMenuItemClick = () => {
+ fetchTeamSpaceList()
+  if (menuInfo.value.menuItems.length > 3) {
+    // 若 menuItems 存在，跳转到第一个菜单项的 key
+    router.push(menuInfo.value.menuItems[3].children[0].key);
+  } else {
+    // 若 menuItems 不存在，跳转到固定菜单项的 key
+    router.push(fixedMenuItems[2].key);
+  }
+};
 
 // 加载团队空间列表
 const fetchTeamSpaceList = async () => {
@@ -139,8 +155,13 @@ const fetchTeamSpaceList = async () => {
 /**
  * 监听变量，改变时触发数据的重新加载
  */
+onBeforeUnmount(() => {
+  fetchTeamSpaceList()
+})
+
 watchEffect(() => {
   // 登录才加载
+  console.log('监听变量，改变时触发数据的重新加载');
   if (loginUserStore.loginUser.id) {
     fetchTeamSpaceList()
   }
@@ -182,3 +203,15 @@ watchEffect(() => {
   background-color: #000;
 }
 </style>    
+
+
+// 处理菜单项点击事件
+const handleMenuItemClick = () => {
+  if (menuItems.value.length > 0) {
+    // 若 menuItems 存在，跳转到第一个菜单项的 key
+    router.push(menuItems.value[0].key);
+  } else {
+    // 若 menuItems 不存在，跳转到固定菜单项的 key
+    router.push(fixedMenuItems[2].key);
+  }
+};

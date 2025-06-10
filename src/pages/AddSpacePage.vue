@@ -60,7 +60,6 @@ import {
   updateSpaceUsingPost
 } from '@/api/spaceController.ts'
 
-
 const space = ref<API.SpaceVO>()
 const onSuccess = (newSpace: API.SpaceVO) => {
   space.value = newSpace;
